@@ -1,52 +1,211 @@
 {
-  "status": "stopped-by-user",
-  "reason": "User requested stopping the cloud render, pushing all source/context to GitHub main, and handing full recording to a laptop GPU agent.",
+  "status": "complete",
+  "verifiedDate": "2026-10-01",
+  "captureSourceCommit": "f3490b6c64f48e56b42bdf3b359e7c6858418628",
   "sourceHash": "090013292d8f5d247f522f42402662883680e442a6e35fcc311c10d6809d8a80",
-  "publishedSceneSourceCommit": "486260a6f94c3fa175620005d2f9e29820e439ba",
-  "method": "Actual production WebGL browser canvas captured at n/24 seconds. No frame interpolation.",
-  "cloudRenderer": "Chromium 153 / ANGLE SwiftShader / WebGL2",
-  "partialCapture": {
-    "savedFrames": 431,
-    "firstFrame": 0,
-    "lastFrame": 430,
-    "targetFrames": 720,
-    "width": 1280,
-    "height": 720,
-    "fps": 24,
-    "coveredSeconds": 17.958333333333332,
-    "allSavedPngHashesMatchLedger": true,
+  "forestSourceUnchanged": true,
+  "method": "Fresh actual browser WebGL canvas frames at n/24 seconds; no interpolation, repeated stills or cloud frames.",
+  "hardwareProbe": {
+    "sourceHash": "090013292d8f5d247f522f42402662883680e442a6e35fcc311c10d6809d8a80",
+    "browserVersion": "154.0.8037.57",
+    "graphics": {
+      "vendor": "Google Inc. (AMD)",
+      "renderer": "ANGLE (AMD, AMD Radeon 780M Graphics (0x00001900) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "unmasked": true,
+      "webglVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "software": false,
+      "hardwareVerified": true
+    }
+  },
+  "gpuDriverVersion": "32.0.31041.1004",
+  "nodeVersion": "22.22.2",
+  "pythonVersion": "3.11.15 (isolated verification environment)",
+  "ffmpegVersion": "8.0.1",
+  "smokeCapture": {
+    "frames": 3,
+    "uniqueDecodedFrames": 3,
+    "width": 1920,
+    "height": 1080,
+    "status": "complete",
     "consoleErrors": [],
-    "inGit": false
+    "allThreeFramesVisuallyInspected": true
   },
-  "finalMovie": {
-    "status": "not-complete",
-    "delivered": false
-  },
-  "previousPreview": {
-    "seconds": 8,
-    "frames": 192,
-    "fps": 24,
-    "resolution": [
-      1280,
-      720
-    ],
-    "deliveredEarlier": true
-  },
-  "nextCapture": {
-    "location": "user laptop hardware GPU",
-    "startNewSequence": true,
+  "laptopCapture": {
+    "status": "complete",
     "width": 1920,
     "height": 1080,
     "fps": 24,
     "frames": 720,
-    "durationSeconds": 30,
-    "1080pPreviouslyValidated": false,
-    "requireHardwareProbe": true,
-    "requireSmokeFrames": true,
-    "handoff": "GPU_CAPTURE_HANDOFF.md"
+    "expectedFrames": 720,
+    "duration": 30,
+    "wallSeconds": 405.08,
+    "consoleErrors": []
   },
-  "resumeSeamEvidence": [
-    "artifacts/capture-resume-seam.jpg",
-    "artifacts/capture-resume-seam.json"
-  ]
+  "frameVerification": {
+    "frames": 720,
+    "expectedFrames": 720,
+    "fps": 24,
+    "durationSeconds": 30.0,
+    "dimensions": [
+      1920,
+      1080
+    ],
+    "uniqueFrames": 720,
+    "uniqueDecodedFrames": 720,
+    "expectedCutFrames": [
+      192,
+      336,
+      480,
+      600
+    ],
+    "motionJumpThreshold": 10.078189300411523,
+    "motionJumpFrames": [],
+    "failures": []
+  },
+  "allNativePngHashesMatchLedger": true,
+  "deterministicTimesAndFiveShotsVerified": true,
+  "finalMovie": {
+    "status": "complete",
+    "filename": "verdant-forest-30s.mp4",
+    "delivered": true,
+    "delivery": "Local outputs file linked in the laptop Codex chat; media retained outside Git.",
+    "sha256": "b8bcd930976e65e93179b011417975242889e32997fbe107a7d4d97791dbfec6",
+    "bytes": 231454738,
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "pix_fmt": "yuv420p",
+          "color_range": "tv",
+          "color_space": "bt709",
+          "color_transfer": "bt709",
+          "color_primaries": "bt709",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "duration": "30.000000",
+          "nb_read_frames": "720"
+        }
+      ],
+      "format": {
+        "duration": "30.000000",
+        "size": "231454738"
+      }
+    },
+    "fullyDecodedWithoutErrors": true,
+    "uniqueDecodedFrames": 720
+  },
+  "playback": {
+    "ended": true,
+    "duration": 30,
+    "currentTime": 30,
+    "width": 1920,
+    "height": 1080,
+    "playbackRate": 1,
+    "wallSeconds": 30.00739999997616,
+    "totalVideoFrames": 720,
+    "droppedVideoFrames": 0,
+    "presentedFrameCallbacks": 719,
+    "error": null,
+    "browserVersion": "154.0.8037.57",
+    "pageErrors": []
+  },
+  "visualReview": {
+    "status": "passed",
+    "allDecodedFramesInspected": 720,
+    "sequentialReviewSheets": 30,
+    "fullResolutionFrameIndices": [
+      0,
+      96,
+      191,
+      192,
+      264,
+      335,
+      336,
+      408,
+      479,
+      480,
+      540,
+      599,
+      600,
+      660,
+      719
+    ],
+    "intentionalCutFrames": [
+      192,
+      336,
+      480,
+      600
+    ],
+    "findings": "Five shots, opening/ending, cuts, bark, flowers, moss, fine ground detail, distant canopy, shadows and exposure inspected. No unexpected jumps, blank frames or obvious encoding defects observed.",
+    "rgbThumbnailMeanAbsoluteDifferenceFromNative": {
+      "mean": 1.2774381590792183,
+      "max": 1.4477372685185186
+    }
+  },
+  "localFixes": [
+    "Preserve approved LF forest bytes on Windows with .gitattributes.",
+    "Use existing favicon.svg in capture harness to prevent Chrome favicon 404.",
+    "Tag converted frames explicitly with setparams; assert export dimensions, cadence, frame count, duration and BT.709 tags. No additional transfer conversion."
+  ],
+  "nonfatalDriverWarnings": [
+    "ANGLE shader compilation reported X3595 about derivatives in a varying loop; no shader/console errors or observed visual failure. Scene shaders were preserved."
+  ],
+  "limits": "Frame-by-frame capture took 405.08 seconds. Encoded 24 fps and successful playback do not establish interactive forest rendering at 24 fps.",
+  "mediaAndDependenciesInGit": false,
+  "previousCloudCapture": {
+    "status": "stopped-by-user",
+    "reason": "User requested stopping the cloud render, pushing all source/context to GitHub main, and handing full recording to a laptop GPU agent.",
+    "sourceHash": "090013292d8f5d247f522f42402662883680e442a6e35fcc311c10d6809d8a80",
+    "publishedSceneSourceCommit": "486260a6f94c3fa175620005d2f9e29820e439ba",
+    "method": "Actual production WebGL browser canvas captured at n/24 seconds. No frame interpolation.",
+    "cloudRenderer": "Chromium 153 / ANGLE SwiftShader / WebGL2",
+    "partialCapture": {
+      "savedFrames": 431,
+      "firstFrame": 0,
+      "lastFrame": 430,
+      "targetFrames": 720,
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "coveredSeconds": 17.958333333333332,
+      "allSavedPngHashesMatchLedger": true,
+      "consoleErrors": [],
+      "inGit": false
+    },
+    "finalMovie": {
+      "status": "not-complete",
+      "delivered": false
+    },
+    "previousPreview": {
+      "seconds": 8,
+      "frames": 192,
+      "fps": 24,
+      "resolution": [
+        1280,
+        720
+      ],
+      "deliveredEarlier": true
+    },
+    "nextCapture": {
+      "location": "user laptop hardware GPU",
+      "startNewSequence": true,
+      "width": 1920,
+      "height": 1080,
+      "fps": 24,
+      "frames": 720,
+      "durationSeconds": 30,
+      "1080pPreviouslyValidated": false,
+      "requireHardwareProbe": true,
+      "requireSmokeFrames": true,
+      "handoff": "GPU_CAPTURE_HANDOFF.md"
+    },
+    "resumeSeamEvidence": [
+      "artifacts/capture-resume-seam.jpg",
+      "artifacts/capture-resume-seam.json"
+    ]
+  }
 }

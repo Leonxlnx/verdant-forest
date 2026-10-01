@@ -1,0 +1,2 @@
+# Keep the approved byte-level forest fingerprint identical on Windows.
+app/forest/* text eol=lf

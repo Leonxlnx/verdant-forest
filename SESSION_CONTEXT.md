@@ -1,6 +1,6 @@
 # Forest upgrade session and continuation
 
-Read this file with `README.md`, `GPU_CAPTURE_HANDOFF.md`, `PLAN-UPGRADE.md` and `gates/upgrade.md`. The scene improvements are implemented and published. The remaining deliverable is the complete, smooth 30-second browser film, now assigned to a laptop GPU at the user's request. Do not restart the cloud render.
+Read this file with `README.md`, `GPU_CAPTURE_HANDOFF.md`, `PLAN-UPGRADE.md` and `gates/upgrade.md`. The scene improvements are implemented and published. The complete 30-second browser film was verified and delivered locally on 2026-10-01 using the laptop's real GPU, with the approved forest source unchanged. Do not restart the cloud render.
 
 ## User requests
 
@@ -8,11 +8,13 @@ Original request, verbatim:
 
 > fix the issues with the white trees the treetrunk looks like a white thing with morse code lol and yk what try to get more detail into the forest and crazy more into the floor and just a bit more color for example flowers. i want a 30s video screenrecording smooth in the end from you and the render distance should be larger as well clear and WAY more cinematic feeling. the lights dhadows contrast better thanks. and more colorful
 
-Latest instruction, verbatim:
+Cloud handoff instruction, verbatim:
 
 > dann egal push alles zu main und geb meinem agent einen promot auf meinem laptop damit wr mit gpu rendern kann yk danke
 
 This changes the delivery plan: preserve all meaningful source, scripts, prompts and context on GitHub main; stop the slow cloud capture; give the laptop agent a concrete GPU capture handoff. It does not authorize claiming that the final MP4 already exists.
+
+The subsequent laptop request required installed headed Chrome with `--require-hardware`, an actual renderer check, three smoke frames, a fresh complete 1920×1080/24 fps/720-frame sequence, full video review and delivery, and fixes/evidence pushed to main. That work is now complete; the cloud history below remains historical.
 
 ## Implemented scene changes
 
@@ -43,7 +45,11 @@ The production build and TypeScript check passed. All 43 WebGL ES shader program
 
 The cloud browser exposed a disabled WebGL renderer; its unsupported-browser message was not a failure of the site deployment. A separate local Chromium software WebGL runtime produced the actual captured frames. Older native EGL images in the repository are offline geometry/shader inspection renders and must not be called browser screenshots.
 
-An eight-second preview contained 192 distinct browser frames at 1280 × 720 and 24 fps. It was explicitly supplied as a preview. Capture stopped at the user's request after 431 native frames, indices 0–430, representing 17.958333 seconds of 24 fps playback. The full requested film is not complete. Partial checkpoints cannot establish the final duration, all five camera shots or full-film decode quality.
+An eight-second preview contained 192 distinct browser frames at 1280 × 720 and 24 fps. It was explicitly supplied as a preview. Cloud capture stopped at the user's request after 431 native frames, indices 0–430, representing 17.958333 seconds of 24 fps playback. The full film was incomplete at that handoff; none of those partial frames were used for the fresh laptop capture.
+
+The laptop hardware probe identified AMD Radeon 780M through ANGLE/D3D11 in installed headed Chrome 154.0.8037.57. The three-frame smoke and fresh full 720-frame capture passed at 1920×1080 with zero capture console errors. Every native PNG hash matched the ledger and deterministic shot/time checks passed. The supplied verifier found 720 distinct decoded frames, no blank frames or unexplained motion jumps. The final H.264 MP4 fully decoded, has 720 unique decoded frames, 24/1 fps, 30.000000 seconds and limited BT.709 tags. Full normal-speed playback ended with zero dropped frames; every decoded frame was reviewed in sequential sheets and 15 detail/cut frames were inspected at full resolution. All five shots, cuts and fine vegetation detail passed review. Evidence and file hash/size are in `artifacts/upgrade-capture-run.json`; the delivered local movie remains outside Git.
+
+Local capture fixes preserve LF source bytes on Windows, point the harness at the existing favicon, and explicitly tag FFmpeg frame color metadata with `setparams`. The portable exporter now asserts its probed output properties. No scene, lighting, color settings or package lockfile changed. Capture took 405.08 seconds, so playback cadence remains separate from interactive rendering performance.
 
 ## Capture method and constraints
 
@@ -55,7 +61,7 @@ Motion interpolation was investigated as a speed alternative against already cap
 
 The encoder uses matrix-only full-range browser RGB to limited-range BT.709 YUV conversion and consistent tags. An extra transfer-function conversion visibly shifted brightness and was rejected. Capture and encoder scripts were restored after workspace maintenance; use the checked-in versions and the handoff checks rather than assuming old uncommitted diagnostics survived.
 
-## Remaining laptop work
+## Laptop workflow (completed 2026-10-01; retained for reproduction)
 
 1. Follow `GPU_CAPTURE_HANDOFF.md`, install dependencies, select a working hardware WebGL2 browser and verify the approved forest fingerprint.
 2. Capture the complete tour at 1920 × 1080, 24 fps, 720 native frames after the hardware smoke check. Use a fresh full run on the laptop; do not mix the stopped 720p software frames with hardware-rendered frames.
