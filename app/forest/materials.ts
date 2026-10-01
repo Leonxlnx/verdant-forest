@@ -105,18 +105,33 @@ export function groundMaterial(map:THREE.Texture,normalMap:THREE.Texture){
  m.onBeforeCompile=s=>{
   s.vertexShader='varying vec3 vGroundPosition;\n'+s.vertexShader;
   s.vertexShader=s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvGroundPosition=(modelMatrix*vec4(position,1.)).xyz;');
-  s.fragmentShader='varying vec3 vGroundPosition;\n'+s.fragmentShader;
+  s.fragmentShader=`varying vec3 vGroundPosition;
+ float groundCoverHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+ float groundCoverNoise(vec2 p){
+  vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+  return mix(mix(groundCoverHash(i),groundCoverHash(i+vec2(1.,0.)),f.x),mix(groundCoverHash(i+vec2(0.,1.)),groundCoverHash(i+vec2(1.,1.)),f.x),f.y);
+ }
+ `+s.fragmentShader;
   s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
-   float distant=smoothstep(18.,68.,distance(cameraPosition.xz,vGroundPosition.xz));
+   // True view distance includes the camera's altitude. A canopy view must
+   // retain the color of low vegetation even directly underneath the camera.
+   float distant=smoothstep(12.,48.,distance(cameraPosition,vGroundPosition));
    float trail=abs(vGroundPosition.x-sin(vGroundPosition.z*.09)*3.6-sin(vGroundPosition.z*.027)*4.);
-   float coverPatch=.5+.26*sin(vGroundPosition.x*.31+sin(vGroundPosition.z*.19)*2.)+.19*sin(vGroundPosition.z*.71+vGroundPosition.x*.14);
-   vec3 lowCover=mix(vec3(.012,.028,.007),vec3(.038,.066,.019),clamp(coverPatch,0.,1.));
-   // Preserve the average colour of subpixel grass as its geometry is reduced.
-   // Full photographic litter remains visible at normal inspection distance.
-   diffuseColor.rgb=mix(diffuseColor.rgb,lowCover,distant*.83*smoothstep(.35,1.2,trail));
+   vec2 coverUV=vGroundPosition.xz;
+   float broadCover=groundCoverNoise(coverUV*.14);
+   float mediumCover=groundCoverNoise(coverUV*.57+vec2(broadCover*1.6,21.4));
+   float fineCover=groundCoverNoise(coverUV*3.1+vec2(7.3,19.1));
+   float coverPatch=clamp(broadCover*.5+mediumCover*.35+fineCover*.15,0.,1.);
+   vec3 lowCover=mix(vec3(.019,.038,.009),vec3(.060,.099,.028),coverPatch);
+   float litterLuma=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+   lowCover*=.88+clamp(litterLuma*5.,0.,1.)*.2;
+   // Preserve both the close photographic litter and the narrow brown trail.
+   // Beyond detailed vegetation range, the ground represents its average cover.
+   float coverBlend=(1.-pow(1.-distant,1.5))*.985*smoothstep(.35,1.2,trail);
+   diffuseColor.rgb=mix(diffuseColor.rgb,lowCover,coverBlend);
   `);
  };
- m.customProgramCacheKey=()=>`forest-ground-v2`;return m;
+ m.customProgramCacheKey=()=>`forest-ground-v3`;return m;
 }
 export function mossRockMaterial() {
  const m=new THREE.MeshStandardMaterial({color:'#c1c5b3',map:texture('/textures/rock-color.jpg',true),normalMap:texture('/textures/rock-normal.jpg'),roughness:.96,vertexColors:true});
@@ -206,34 +221,75 @@ export function treeDepthMaterial(){
  depth.customProgramCacheKey=()=>`forest-wood-shadow-v1`;return depth;
 }
 export function treeBarkMaterial(species:string,map:THREE.Texture,normalMap:THREE.Texture){
- const m=new THREE.MeshStandardMaterial({map,normalMap,normalScale:new THREE.Vector2(species==='oak'?.65:species==='birch'?.09:.27,species==='oak'?.65:species==='birch'?.09:.27),color:species==='oak'?'#c6b298':species==='beech'?'#cfcec2':'#eeeecc',roughness:.94});
+ const m=new THREE.MeshStandardMaterial({map,normalMap,normalScale:new THREE.Vector2(species==='oak'?.65:species==='birch'?.16:.27,species==='oak'?.65:species==='birch'?.16:.27),color:species==='oak'?'#c6b298':species==='beech'?'#cfcec2':'#e3dac5',roughness:.94});
  m.onBeforeCompile=s=>{
  applyTreeWind(s);
- s.vertexShader='varying vec3 vBarkPosition;\n'+s.vertexShader;
- s.vertexShader=s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvBarkPosition=position;');
- s.fragmentShader='varying vec3 vBarkPosition;\n'+s.fragmentShader;
+ s.vertexShader='varying vec3 vBarkPosition; varying vec3 vBarkVariation;\n'+s.vertexShader;
+ s.vertexShader=s.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+ vBarkPosition=position;
+ vec4 barkOrigin=vec4(0.,0.,0.,1.);
+ #ifdef USE_INSTANCING
+ barkOrigin=instanceMatrix*barkOrigin;
+ #endif
+ barkOrigin=modelMatrix*barkOrigin;
+ // The same geometry can occur in many trees. The material must not repeat
+ // its pale fields and scars at precisely the same heights on each one.
+ vBarkVariation=vec3(barkOrigin.x*.71,barkOrigin.z*.37,barkOrigin.x*.23+barkOrigin.z*.51);
+ `);
+ s.fragmentShader=`varying vec3 vBarkPosition; varying vec3 vBarkVariation;
+ ${species==='birch'?`
+ float birchHash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+ float birchNoise(vec3 p){
+  vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+  return mix(mix(mix(birchHash(i),birchHash(i+vec3(1.,0.,0.)),f.x),mix(birchHash(i+vec3(0.,1.,0.)),birchHash(i+vec3(1.,1.,0.)),f.x),f.y),mix(mix(birchHash(i+vec3(0.,0.,1.)),birchHash(i+vec3(1.,0.,1.)),f.x),mix(birchHash(i+vec3(0.,1.,1.)),birchHash(i+vec3(1.,1.,1.)),f.x),f.y),f.z);
+ }
+ `:''}
+ `+s.fragmentShader;
  s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
  float flake=sin(vBarkPosition.y*14.+sin(vBarkPosition.x*10.)*3.)*sin(vBarkPosition.z*8.3);
  ${species==='birch'?`
- float around=atan(vBarkPosition.z,vBarkPosition.x)/6.283185;
- float row=floor(vBarkPosition.y*7.3);
- float rowSeed=fract(sin(row*127.1)*43758.5453);
- float along=around*17.+rowSeed*23.;
- float segment=floor(along);
- float markSeed=fract(sin(segment*47.7+row*311.7)*951.1357);
- float horizontal=1.-smoothstep(.07+markSeed*.22,.095+markSeed*.22,abs(fract(along)-.5));
- float vertical=1.-smoothstep(.016,.047,abs(fract(vBarkPosition.y*7.3)-(.26+rowSeed*.43)));
- float lenticel=horizontal*vertical*smoothstep(.13,.31,markSeed);
- float paper=.85+.11*sin(vBarkPosition.y*2.6+sin(around*19.))+.035*flake;
- vec3 whiteBark=vec3(.55,.565,.49)*paper;
- whiteBark=mix(whiteBark,diffuseColor.rgb, .09);
- whiteBark=mix(whiteBark,vec3(.073,.075,.056),lenticel*.78);
- float baseRoughness=1.-smoothstep(.35,2.8,vBarkPosition.y);
- diffuseColor.rgb=mix(whiteBark,diffuseColor.rgb*.77,baseRoughness*.72);
+ vec3 barkP=vBarkPosition+vBarkVariation;
+ // Continuous fields replace the old fixed-height rows and angular cells.
+ // Every lenticel has a different length, position and broken edge, while
+ // the world-space noise avoids a cylindrical UV seam on branches.
+ float ageField=birchNoise(barkP*vec3(1.7,.36,1.7));
+ float stainField=birchNoise(barkP*vec3(4.8,1.6,4.8)+13.7);
+ float paperField=birchNoise(barkP*vec3(5.2,13.,5.2)+31.4);
+ float barkFineVisibility=1.-smoothstep(3.,13.,length(vViewPosition));
+ float fineGrain=mix(.5,birchNoise(barkP*vec3(90.,25.,90.)),barkFineVisibility);
+ float warpedHeight=barkP.y+(stainField-.5)*.07;
+ float lenticelField=birchNoise(vec3(barkP.x*19.,warpedHeight*112.,barkP.z*19.));
+ float lenticelGate=smoothstep(.31,.69,stainField);
+ float lenticel=smoothstep(.70,.86,lenticelField)*lenticelGate*mix(.22,1.,barkFineVisibility);
+ float oldScar=birchNoise(vec3(barkP.x*8.5,warpedHeight*31.,barkP.z*8.5)+71.9);
+ float tornBark=smoothstep(.76,.9,oldScar)*smoothstep(.42,.68,ageField);
+ float peelEdge=(1.-smoothstep(.022,.065,abs(paperField-.51)))*smoothstep(.48,.74,stainField);
+ vec3 paleBark=mix(vec3(.26,.265,.235),vec3(.54,.515,.445),smoothstep(.22,.77,ageField));
+ paleBark=mix(paleBark,paleBark*vec3(.75,.73,.69),smoothstep(.57,.8,stainField)*.50);
+ paleBark*=.90+stainField*.16+(fineGrain-.5)*.055;
+ paleBark=mix(paleBark,vec3(.34,.29,.215),peelEdge*.20);
+ paleBark=mix(paleBark,vec3(.135,.114,.083),lenticel*.42+tornBark*.46);
+ // A little photographic microstructure remains in the smooth upper bark.
+ // Close to the roots, rough brown bark emerges along an irregular edge.
+ float sourceLuma=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+ paleBark*=mix(.9,1.09,smoothstep(.015,.22,sourceLuma));
+ float baseWeathering=1.-smoothstep(.12,2.1+stainField*1.5,vBarkPosition.y+(ageField-.5)*1.4);
+ diffuseColor.rgb=mix(paleBark,diffuseColor.rgb*.94,baseWeathering*.87);
  ` : species==='beech'?`float luma=dot(diffuseColor.rgb,vec3(.3,.59,.11));diffuseColor.rgb=mix(diffuseColor.rgb,vec3(luma*1.15,luma*1.17,luma*1.13),.75);`:''}
  float moss=(1.-smoothstep(.1,3.3,vBarkPosition.y))*(.25+.30*sin(vBarkPosition.x*5.+vBarkPosition.z*7.)+.17*flake);
  diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.055,.085,.019),clamp(moss,0.,.8));
  `);
+ if(species==='birch')s.fragmentShader=s.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+ // Sub-millimetre paper edges catch grazing light without turning the trunk
+ // into a rocky surface. Fade the relief before it becomes subpixel shimmer.
+ float barkDetailFade=1.-smoothstep(3.,12.,length(vViewPosition));
+ float barkRelief=(peelEdge*.00036+fineGrain*.00015-lenticel*.0002-tornBark*.00032)*barkDetailFade;
+ vec3 barkDx=dFdx(-vViewPosition),barkDy=dFdy(-vViewPosition);
+ vec3 barkRx=cross(barkDy,normal),barkRy=cross(normal,barkDx);
+ float barkDet=dot(barkDx,barkRx)*faceDirection;
+ vec3 barkGradient=sign(barkDet)*(dFdx(barkRelief)*barkRx+dFdy(barkRelief)*barkRy);
+ normal=normalize(max(abs(barkDet),1.e-12)*normal-barkGradient);
+ `);
  };
- m.customProgramCacheKey=()=>`forest-tree-bark-${species}-v3`;return m;
+ m.customProgramCacheKey=()=>`forest-tree-bark-${species}-v5`;return m;
 }

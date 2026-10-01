@@ -86,3 +86,20 @@ artifacts/release-export.log
 artifacts/crown-detail-data/
 artifacts/crown-detail-study/
 artifacts/crown-detail-export.log
+
+# Cinematic capture intermediates (reproducible from current engine)
+artifacts/browser-probe/
+artifacts/browser-tour-review/
+artifacts/browser-final-review/
+artifacts/browser-final-capture/
+artifacts/upgrade-capture-views/
+artifacts/upgrade-floor-modules/
+artifacts/lighting-qa/
+artifacts/perf-qa/
+artifacts/capture-dev.log
+artifacts/browser-*.log
+artifacts/*-export.log
+artifacts/upgrade-bark/*.bin
+artifacts/upgrade-bark/*.mjs
+artifacts/upgrade-bark/*.vert
+artifacts/upgrade-bark/*.frag

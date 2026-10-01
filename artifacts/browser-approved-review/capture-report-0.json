@@ -1,0 +1,144 @@
+{
+  "source": "actual-browser-WebGL-fixed-step-capture",
+  "sourceHash": "090013292d8f5d247f522f42402662883680e442a6e35fcc311c10d6809d8a80",
+  "sourceHashes": {
+    "atmosphere.ts": "638a6782ed164503d7d7e7f8ad7b043c035248a81becc15bce8754cfd1b17242",
+    "botanical-refinement.js": "3c7143e72037c138c2dce66a932c9cb291d5c24042a60dcb3947ff39b34c2860",
+    "bracket-fungus.js": "5cfde44be8c15045813e73f93bf25e6a93cacc5fb6a26bc36309a309adcc9ca7",
+    "cinematic.ts": "2948242c19dfd9c30ec57ecee124bc02183479a45256cf520e215a6441aea576",
+    "compact-grass.ts": "7da55b9a0abd24459b3a6246850ca666cb581f9ca03eb8adba25ca4fa5d2106a",
+    "config.ts": "9272f6629a471f441661d28c0d26462ffc542a5207a80cee0b6faeb1d47088e7",
+    "controls.ts": "619f5dfb54757803b703eec299e1da8847fbb16254785f4c45c6789188017b0b",
+    "details.ts": "cbb0ce15b369394e057f301a484019ffaec3578a14845384ca0f96619cb6cc88",
+    "distant-trees.ts": "c13a03a4c481f1b223b8a0100c299d23d5e48c89028cfe0526872ee703f1ac9d",
+    "engine.ts": "70accde04fa9c3d6a49ead7ff22604cd9f23078cf2c34f01fd627983fca36b25",
+    "floor-detail.ts": "ed716d5dcc7da7359127376d994f292d319b86152f6366ea8244a4a4ee183b2f",
+    "geometry-memory.ts": "5f91bc61cc892f23c280c533fac21d9841c625708964d721fbbce7afcd51bee2",
+    "materials.ts": "c998251a2130376685c7e0ca594f5ab921a39d17894d3f8f7de765f97f162a8f",
+    "math.ts": "fa77efda4656b076002cfb34d8e177b15bd9eb13d17082c20b95f29843fff548",
+    "shadow-window.ts": "7db4ba723fb62471e9a791d54a211da03200dedec2b1e9b9adac90b51636ebd9",
+    "surfaces.ts": "23ed94ba0ab03f3552d8016426c390050ce623d51efa4fa82cb18f4d621a8a25",
+    "trees.js": "d78a8f71602cc20b650b28fd9d158c4ec4738c10630583a2d19dc761aa31e475",
+    "trunk-life.ts": "4e59d4e08d9f2726ab14b09c703c0afa624a5e0e99843bf69a776c6a0ad522c7",
+    "understory.js": "df95c281a50a53bd4fd119dd858c8c301ab6129831867671d9e7f13fb4e35416",
+    "vegetation.ts": "013d4617b8ee86ecc7d269fd9fb70d879f7b1f49ca923506b7c2b1dc37611eba",
+    "volumetrics.ts": "5539033e3a929559579550528a11ec3dde87b30fcb551f9c6c86c33da4eeb096",
+    "wildflowers.ts": "5229975a6e6fd9d944f969c1919978ebcd89ed738fb1f5f889ebdd4239dde707"
+  },
+  "url": "http://127.0.0.1:5173/?capture=1",
+  "info": {
+    "duration": 30,
+    "width": 1280,
+    "height": 720,
+    "objects": {
+      "trees": 7155,
+      "grass": 2529528,
+      "ferns": 39598,
+      "shrubs": 4341,
+      "herbs": 43953,
+      "ivyClimbers": 128,
+      "ivyLeaves": 7602,
+      "bracketClusters": 56,
+      "mossShoots": 214811,
+      "rootSystems": 356,
+      "twigs": 4000,
+      "acorns": 850,
+      "wildflowers": 9193,
+      "flowerDrifts": 172,
+      "flowerFamilies": 4,
+      "sorrelPatches": 9539,
+      "mossRosettes": 4823,
+      "curledLeafPiles": 5650,
+      "seedheadClumps": 756,
+      "smallPebbles": 1931
+    }
+  },
+  "width": 1280,
+  "height": 720,
+  "fps": 30,
+  "frames": 3,
+  "start": 0,
+  "duration": null,
+  "wallSeconds": 85.244,
+  "consoleErrors": [],
+  "timings": [
+    {
+      "frame": 240,
+      "time": 8,
+      "ms": 44819,
+      "sha256": "61884978692cd4cfb09787504ee5f751b3570f386d2905069f1cbbdb086aa835",
+      "width": 1280,
+      "height": 720,
+      "state": {
+        "name": "flowers-and-ferns",
+        "index": 1,
+        "position": [
+          7.8,
+          1.3829170837896692,
+          14.1
+        ],
+        "target": [
+          6.5,
+          0.47924052838904607,
+          11.1
+        ],
+        "fov": 53,
+        "time": 8,
+        "triangles": 60130289,
+        "draws": 1448
+      }
+    },
+    {
+      "frame": 750,
+      "time": 25,
+      "ms": 23002,
+      "sha256": "05ebbdf5f8aee55390fb0e3ddceffaec42b5ed61bf8aa795a174604b877cd100",
+      "width": 1280,
+      "height": 720,
+      "state": {
+        "name": "canopy-reveal",
+        "index": 4,
+        "position": [
+          -15,
+          25.572482101477288,
+          25
+        ],
+        "target": [
+          0,
+          10.779308410557991,
+          -8
+        ],
+        "fov": 58,
+        "time": 25,
+        "triangles": 55570631,
+        "draws": 1450
+      }
+    },
+    {
+      "frame": 840,
+      "time": 28,
+      "ms": 17417,
+      "sha256": "4aad60eade2185f92c1eddd06a5d57c072ee7fdd071a206d0c09b038e02fda51",
+      "width": 1280,
+      "height": 720,
+      "state": {
+        "name": "canopy-reveal",
+        "index": 4,
+        "position": [
+          -12.732,
+          27.225075491407413,
+          20.788
+        ],
+        "target": [
+          -1.944,
+          12.318742618357406,
+          -15.128
+        ],
+        "fov": 58,
+        "time": 28,
+        "triangles": 55725412,
+        "draws": 1383
+      }
+    }
+  ]
+}

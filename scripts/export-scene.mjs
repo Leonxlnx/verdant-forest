@@ -8,6 +8,9 @@ const {compactGeometryAttributes}=await import('../artifacts/qa-modules/geometry
 const {createVegetation}=await import('../artifacts/qa-modules/vegetation.mjs');
 const {createGround,createRocks,createDeadwood,createLitter,createMushrooms}=await import('../artifacts/qa-modules/surfaces.mjs');
 const {createForestDetails}=await import('../artifacts/qa-modules/details.mjs');
+const {createWildflowers}=await import('../artifacts/qa-modules/wildflowers.mjs');
+const {createFloorDetail}=await import('../artifacts/qa-modules/floor-detail.mjs');
+const {cinematicView,FOREST_FILM_DURATION}=await import('../artifacts/qa-modules/cinematic.mjs');
 const {viewpoints}=await import('../artifacts/qa-modules/controls.mjs');
 const {heightAt}=await import('../artifacts/qa-modules/math.mjs');
 const {FOREST_LIGHTING,FOREST_EXTENT}=await import('../artifacts/qa-modules/config.mjs');
@@ -18,7 +21,9 @@ const particle=addParticles(new THREE.Scene(),new THREE.DirectionalLight()).poin
 const particleInfo={position:Array.from(particle.geometry.attributes.position.array),seed:Array.from(particle.geometry.attributes.seed.array),vertexShader:particle.material.vertexShader,fragmentShader:particle.material.fragmentShader};
 const scene=new THREE.Scene();
 createGround(scene);const rocks=createRocks(scene);createLitter(scene);createMushrooms(scene);
-const v=await createVegetation(scene,false);createDeadwood(scene,v.bark);const details=createForestDetails(scene,v.treePositions,rocks,v.bark,false,v.treeSurfaces);scene.updateMatrixWorld(true);compactGeometryAttributes(scene);
+const v=await createVegetation(scene,false);createDeadwood(scene,v.bark);const details=createForestDetails(scene,v.treePositions,rocks,v.bark,false,v.treeSurfaces);
+const flowers=createWildflowers(scene,v.treePositions,rocks,false),floorDetail=createFloorDetail(scene,v.treePositions,rocks,false);
+scene.updateMatrixWorld(true);compactGeometryAttributes(scene);
 const dir=process.env.FOREST_QA_DIR||'artifacts/scene-data';fs.mkdirSync(dir,{recursive:true});
 const geometries=new Map(),materials=new Map(),geoData={},matData={},objects=[],objectMap=new Map();
 function binary(name,array){fs.writeFileSync(path.join(dir,name),Buffer.from(array.buffer,array.byteOffset,array.byteLength));return name;}
@@ -101,10 +106,18 @@ if(process.env.FOREST_QA_STATIONARY==='1'){
  }
  cameraViews.fungus_detail=starts.fungus_detail;
 }
+if(process.env.FOREST_QA_FILM==='1'){
+ for(const name of Object.keys(cameraViews))delete cameraViews[name];
+ const fps=Number(process.env.FOREST_QA_FPS||30),frames=Number(process.env.FOREST_QA_FRAMES||FOREST_FILM_DURATION*fps);
+ for(let frame=0;frame<frames;frame++){
+  const view=cinematicView(frame/fps);
+  cameraViews[`film_${String(frame).padStart(4,'0')}`]={...view,absolute:true,motion:true,sequence:view.name};
+ }
+}
 for(const [k,vp]of Object.entries(cameraViews)){
- const c=new THREE.PerspectiveCamera(58,16/10,.06,FOREST_EXTENT.cameraFar);c.position.set(...vp.position);c.position.y+=heightAt(vp.position[0],vp.position[2]);
- const t=new THREE.Vector3(...vp.target);t.y+=heightAt(vp.target[0],vp.target[2]);c.lookAt(t);c.updateMatrixWorld();
- if(!vp.motion||Number(k.split('_')[1])%9===0){v.update(c,1);details.update(c);}scene.updateMatrixWorld(true);
+ const c=new THREE.PerspectiveCamera(vp.fov||58,process.env.FOREST_QA_FILM==='1'?16/9:16/10,.06,FOREST_EXTENT.cameraFar);c.position.set(...vp.position);if(!vp.absolute)c.position.y+=heightAt(vp.position[0],vp.position[2]);
+ const t=new THREE.Vector3(...vp.target);if(!vp.absolute)t.y+=heightAt(vp.target[0],vp.target[2]);c.lookAt(t);c.updateMatrixWorld();
+ if(!vp.motion||Number(k.split('_')[1])%9===0){v.update(c,1);details.update(c);flowers.update(c);floorDetail.update(c);}scene.updateMatrixWorld(true);
  const frustum=new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(c.projectionMatrix,c.matrixWorldInverse));
  const draws={},shadowDraws={};
  scene.traverseVisible(o=>{
@@ -121,4 +134,4 @@ for(const [k,vp]of Object.entries(cameraViews)){
  });
  views[k]={time:vp.time||0,motion:!!vp.motion,sequence:vp.sequence||null,position:c.position.toArray(),projection:c.projectionMatrix.toArray(),view:c.matrixWorldInverse.toArray(),draws,shadowDraws};
 }
-fs.writeFileSync(path.join(dir,'scene.json'),JSON.stringify({source:JSON.parse(fs.readFileSync('artifacts/qa-modules/source-manifest.json','utf8')),geometries:geoData,materials:matData,objects,views,lighting:{...FOREST_LIGHTING,sun:new THREE.Color(FOREST_LIGHTING.sunColor).multiplyScalar(FOREST_LIGHTING.sunIntensity).toArray(),hemisphereSky:new THREE.Color(FOREST_LIGHTING.skyColor).multiplyScalar(FOREST_LIGHTING.hemisphereIntensity).toArray(),hemisphereGround:new THREE.Color(FOREST_LIGHTING.groundColor).multiplyScalar(FOREST_LIGHTING.hemisphereIntensity).toArray(),fog:new THREE.Color(FOREST_LIGHTING.fogColor).toArray()},sky:skyInfo,particles:particleInfo,stats:{...v.stats,...details.stats}}));console.log(JSON.stringify({objects:objects.length,geometries:geometries.size,materials:materials.size,...v.stats}));
+fs.writeFileSync(path.join(dir,'scene.json'),JSON.stringify({source:JSON.parse(fs.readFileSync('artifacts/qa-modules/source-manifest.json','utf8')),geometries:geoData,materials:matData,objects,views,lighting:{...FOREST_LIGHTING,sun:new THREE.Color(FOREST_LIGHTING.sunColor).multiplyScalar(FOREST_LIGHTING.sunIntensity).toArray(),hemisphereSky:new THREE.Color(FOREST_LIGHTING.skyColor).multiplyScalar(FOREST_LIGHTING.hemisphereIntensity).toArray(),hemisphereGround:new THREE.Color(FOREST_LIGHTING.groundColor).multiplyScalar(FOREST_LIGHTING.hemisphereIntensity).toArray(),fog:new THREE.Color(FOREST_LIGHTING.fogColor).toArray()},sky:skyInfo,particles:particleInfo,stats:{...v.stats,...details.stats,...flowers.stats,...floorDetail.stats}}));console.log(JSON.stringify({objects:objects.length,geometries:geometries.size,materials:materials.size,...v.stats}));

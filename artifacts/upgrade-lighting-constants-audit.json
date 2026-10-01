@@ -1,0 +1,80 @@
+{
+  "lighting": {
+    "sunColor": "#fff0cf",
+    "sunIntensity": 4.9,
+    "skyColor": "#bed9e8",
+    "groundColor": "#53603d",
+    "hemisphereIntensity": 1.9,
+    "skyTop": "#779fab",
+    "skyBottom": "#a5c1c9",
+    "fogColor": "#91aca9",
+    "fogDensity": 0.0023,
+    "exposure": 1.13,
+    "sunDirection": [
+      -52,
+      58,
+      -63
+    ],
+    "volumeStrength": 0.48,
+    "volumeDistance": 132,
+    "hazeStart": 220,
+    "hazeEnd": 435,
+    "shadowHalfExtent": 46,
+    "shadowNear": 1,
+    "shadowFar": 205,
+    "saturation": 1.085
+  },
+  "extent": {
+    "exploration": 95,
+    "vegetation": 540,
+    "terrain": 1100,
+    "terrainSegments": 1144,
+    "cameraFar": 460,
+    "treeFar": 450,
+    "horizonLOD": 150
+  },
+  "visibility": [
+    {
+      "distance": 50,
+      "oldTransmission": 0.9440274829178357,
+      "newTransmission": 0.9868620660736014
+    },
+    {
+      "distance": 100,
+      "oldTransmission": 0.7942158526165467,
+      "newTransmission": 0.9484748552256046
+    },
+    {
+      "distance": 180,
+      "oldTransmission": 0.23701231419693675,
+      "newTransmission": 0.8424878822037569
+    },
+    {
+      "distance": 240,
+      "oldTransmission": 0,
+      "newTransmission": 0.7193872851659419
+    },
+    {
+      "distance": 300,
+      "oldTransmission": 0,
+      "newTransmission": 0.42718483031208604
+    },
+    {
+      "distance": 340,
+      "oldTransmission": 0,
+      "newTransmission": 0.22416186371040991
+    },
+    {
+      "distance": 400,
+      "oldTransmission": 0,
+      "newTransmission": 0.030401968462608023
+    },
+    {
+      "distance": 435,
+      "oldTransmission": 0,
+      "newTransmission": 0
+    }
+  ],
+  "terrainSpacingPreserved": true,
+  "limits": "Optical transmission is analytic material-fog plus horizon blend; scattering and occlusion remain view dependent. Runtime appearance is reviewed separately."
+}

@@ -1,0 +1,27 @@
+{
+  "cloudBrowser": {
+    "url": "https://verdant-forest.lexn8.chatgpt.site/",
+    "observedMessage": "This browser cannot run 3D. Enable hardware acceleration or try another browser."
+  },
+  "localBrowser": {
+    "source": "@sparticuz/chromium@153.0.0 from configured npm registry",
+    "webgl2": true,
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "softwareRendering": true,
+    "extractionNote": "tar --no-same-owner avoided unsupported archive ownership calls; no system graphics or security settings changed."
+  },
+  "dependencies": {
+    "command": "npm run install:ci",
+    "result": "694 packages installed; locked vinext tarball integrity preflight passed; existing package-lock preserved"
+  },
+  "capture": {
+    "method": "Fixed-step current-source application WebGL canvas capture through the production createForest engine",
+    "isBrowserRendering": true,
+    "isRealtimeFpsMeasurement": false,
+    "firstFrame": "artifacts/browser-probe/frame-0000.png",
+    "firstFrameMilliseconds": 49645,
+    "width": 960,
+    "height": 540
+  }
+}

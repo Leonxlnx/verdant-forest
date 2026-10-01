@@ -179,6 +179,6 @@
   ],
   "regression": {
     "passed": true,
-    "error": "GLSL Compiler failed\n\nfragment_shader\n===============\n0:2656(8): error: illegal use of reserved word `patch'\n0:2656(8): error: syntax error, unexpected ERROR_TOK, expecting ',' or ';'\n\n"
+    "error": "GLSL Compiler failed\n\nfragment_shader\n===============\n0:2667(8): error: illegal use of reserved word `patch'\n0:2667(8): error: syntax error, unexpected ERROR_TOK, expecting ',' or ';'\n\n"
   }
 }

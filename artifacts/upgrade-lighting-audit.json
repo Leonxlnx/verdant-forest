@@ -1,0 +1,415 @@
+{
+  "lighting": {
+    "sunColor": "#fff0cf",
+    "sunIntensity": 4.9,
+    "skyColor": "#bed9e8",
+    "groundColor": "#53603d",
+    "hemisphereIntensity": 1.9,
+    "skyTop": "#779fab",
+    "skyBottom": "#a5c1c9",
+    "fogColor": "#91aca9",
+    "fogDensity": 0.0023,
+    "exposure": 1.13,
+    "sunDirection": [
+      -52,
+      58,
+      -63
+    ],
+    "volumeStrength": 0.48,
+    "volumeDistance": 132,
+    "hazeStart": 220,
+    "hazeEnd": 435,
+    "shadowHalfExtent": 46,
+    "shadowNear": 1,
+    "shadowFar": 205,
+    "saturation": 1.085
+  },
+  "extent": {
+    "exploration": 95,
+    "vegetation": 540,
+    "terrain": 1100,
+    "terrainSegments": 1144,
+    "cameraFar": 460,
+    "treeFar": 450,
+    "horizonLOD": 150
+  },
+  "visibility": [
+    {
+      "distance": 50,
+      "oldTransmission": 0.9440274829178357,
+      "newTransmission": 0.9868620660736014
+    },
+    {
+      "distance": 100,
+      "oldTransmission": 0.7942158526165467,
+      "newTransmission": 0.9484748552256046
+    },
+    {
+      "distance": 180,
+      "oldTransmission": 0.23701231419693675,
+      "newTransmission": 0.8424878822037569
+    },
+    {
+      "distance": 240,
+      "oldTransmission": 0,
+      "newTransmission": 0.7193872851659419
+    },
+    {
+      "distance": 300,
+      "oldTransmission": 0,
+      "newTransmission": 0.42718483031208604
+    },
+    {
+      "distance": 340,
+      "oldTransmission": 0,
+      "newTransmission": 0.22416186371040991
+    },
+    {
+      "distance": 400,
+      "oldTransmission": 0,
+      "newTransmission": 0.030401968462608023
+    },
+    {
+      "distance": 435,
+      "oldTransmission": 0,
+      "newTransmission": 0
+    }
+  ],
+  "terrainSpacingPreserved": true,
+  "limits": "Optical transmission is analytic material-fog plus horizon blend; scattering and occlusion remain view dependent. Runtime appearance is reviewed separately.",
+  "scene": {
+    "originalTrees": 3808,
+    "totalTrees": 7155,
+    "originalLayoutPreserved": true,
+    "horizonGeometryTrianglesBefore": 158274,
+    "horizonGeometryTrianglesAfter": 48066,
+    "horizonGeometryRatio": 0.3036885401266159,
+    "horizonWindBoundsPassed": true,
+    "horizon": [
+      {
+        "name": "oak-wood-215-horizon",
+        "source": 4872,
+        "triangles": 1189
+      },
+      {
+        "name": "oak-leaves-215-horizon",
+        "source": 16052,
+        "triangles": 5352
+      },
+      {
+        "name": "oak-wood-3491-horizon",
+        "source": 4563,
+        "triangles": 1137
+      },
+      {
+        "name": "oak-leaves-3491-horizon",
+        "source": 15016,
+        "triangles": 5006
+      },
+      {
+        "name": "oak-wood-5129-horizon",
+        "source": 4578,
+        "triangles": 1100
+      },
+      {
+        "name": "oak-leaves-5129-horizon",
+        "source": 15038,
+        "triangles": 5014
+      },
+      {
+        "name": "beech-wood-1034-horizon",
+        "source": 4405,
+        "triangles": 838
+      },
+      {
+        "name": "beech-leaves-1034-horizon",
+        "source": 15534,
+        "triangles": 5178
+      },
+      {
+        "name": "oak-wood-1853-horizon",
+        "source": 4461,
+        "triangles": 1019
+      },
+      {
+        "name": "oak-leaves-1853-horizon",
+        "source": 15016,
+        "triangles": 5006
+      },
+      {
+        "name": "birch-wood-2672-horizon",
+        "source": 4183,
+        "triangles": 580
+      },
+      {
+        "name": "birch-leaves-2672-horizon",
+        "source": 15534,
+        "triangles": 5178
+      },
+      {
+        "name": "birch-wood-5948-horizon",
+        "source": 4069,
+        "triangles": 488
+      },
+      {
+        "name": "birch-leaves-5948-horizon",
+        "source": 15032,
+        "triangles": 5012
+      },
+      {
+        "name": "beech-wood-4310-horizon",
+        "source": 4387,
+        "triangles": 791
+      },
+      {
+        "name": "beech-leaves-4310-horizon",
+        "source": 15534,
+        "triangles": 5178
+      }
+    ],
+    "views": [
+      {
+        "i": 0,
+        "triangles": 33737437,
+        "draws": 663
+      },
+      {
+        "i": 1,
+        "triangles": 32972782,
+        "draws": 670
+      },
+      {
+        "i": 2,
+        "triangles": 28887354,
+        "draws": 656
+      },
+      {
+        "i": 3,
+        "triangles": 29712919,
+        "draws": 621
+      },
+      {
+        "i": 4,
+        "triangles": 30720389,
+        "draws": 638
+      },
+      {
+        "i": 5,
+        "triangles": 31338203,
+        "draws": 695
+      },
+      {
+        "i": 6,
+        "triangles": 26953499,
+        "draws": 625
+      },
+      {
+        "i": 7,
+        "triangles": 35162671,
+        "draws": 656
+      },
+      {
+        "i": 8,
+        "triangles": 31773823,
+        "draws": 670
+      },
+      {
+        "i": 9,
+        "triangles": 32500460,
+        "draws": 646
+      },
+      {
+        "i": 10,
+        "triangles": 31873655,
+        "draws": 654
+      },
+      {
+        "i": 11,
+        "triangles": 29150589,
+        "draws": 607
+      },
+      {
+        "i": 12,
+        "triangles": 27177245,
+        "draws": 628
+      },
+      {
+        "i": 13,
+        "triangles": 31716233,
+        "draws": 645
+      },
+      {
+        "i": 14,
+        "triangles": 28829467,
+        "draws": 636
+      },
+      {
+        "i": 15,
+        "triangles": 33157452,
+        "draws": 636
+      },
+      {
+        "i": 16,
+        "triangles": 33198903,
+        "draws": 650
+      },
+      {
+        "i": 17,
+        "triangles": 33932432,
+        "draws": 645
+      },
+      {
+        "i": 18,
+        "triangles": 34472747,
+        "draws": 693
+      },
+      {
+        "i": 19,
+        "triangles": 32810427,
+        "draws": 672
+      },
+      {
+        "i": 20,
+        "triangles": 32585814,
+        "draws": 680
+      },
+      {
+        "i": 21,
+        "triangles": 35483983,
+        "draws": 646
+      },
+      {
+        "i": 22,
+        "triangles": 32953927,
+        "draws": 678
+      },
+      {
+        "i": 23,
+        "triangles": 35004038,
+        "draws": 673
+      },
+      {
+        "i": 24,
+        "triangles": 32761885,
+        "draws": 693
+      },
+      {
+        "i": 25,
+        "triangles": 34664337,
+        "draws": 660
+      },
+      {
+        "i": 26,
+        "triangles": 34759605,
+        "draws": 665
+      },
+      {
+        "i": 27,
+        "triangles": 34276509,
+        "draws": 674
+      },
+      {
+        "i": 28,
+        "triangles": 30330633,
+        "draws": 642
+      },
+      {
+        "i": 29,
+        "triangles": 31103177,
+        "draws": 640
+      },
+      {
+        "i": 30,
+        "triangles": 27807310,
+        "draws": 647
+      },
+      {
+        "i": 31,
+        "triangles": 34035859,
+        "draws": 656
+      },
+      {
+        "i": 32,
+        "triangles": 29913677,
+        "draws": 696
+      },
+      {
+        "i": 33,
+        "triangles": 34945032,
+        "draws": 624
+      },
+      {
+        "i": 34,
+        "triangles": 30529092,
+        "draws": 650
+      },
+      {
+        "i": 35,
+        "triangles": 29919715,
+        "draws": 649
+      },
+      {
+        "i": 36,
+        "triangles": 28744199,
+        "draws": 663
+      },
+      {
+        "i": 37,
+        "triangles": 34084910,
+        "draws": 681
+      },
+      {
+        "i": 38,
+        "triangles": 33685356,
+        "draws": 609
+      },
+      {
+        "i": 39,
+        "triangles": 31354453,
+        "draws": 622
+      },
+      {
+        "i": 40,
+        "triangles": 29282212,
+        "draws": 639
+      },
+      {
+        "i": 41,
+        "triangles": 35071679,
+        "draws": 654
+      },
+      {
+        "i": 42,
+        "triangles": 29907147,
+        "draws": 639
+      },
+      {
+        "i": 43,
+        "triangles": 33289881,
+        "draws": 674
+      },
+      {
+        "i": 44,
+        "triangles": 27878079,
+        "draws": 668
+      },
+      {
+        "i": 45,
+        "triangles": 31409866,
+        "draws": 663
+      },
+      {
+        "i": 46,
+        "triangles": 37322671,
+        "draws": 674
+      },
+      {
+        "i": 47,
+        "triangles": 31711543,
+        "draws": 671
+      }
+    ],
+    "maxTriangles": 37322671,
+    "maxDraws": 696
+  }
+}

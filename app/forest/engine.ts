@@ -9,11 +9,15 @@ import {createVolumetrics} from './volumetrics';
 import {createForestDetails} from './details';
 import {compactGeometryAttributes} from './geometry-memory';
 import {placeShadowWindow} from './shadow-window';
+import {createWildflowers} from './wildflowers';
+import {createFloorDetail} from './floor-detail';
+import {applyCinematicCamera,FOREST_FILM_DURATION} from './cinematic';
 
 export async function createForest(host:HTMLDivElement,onReady:()=>void,signal?:AbortSignal){
  signal?.throwIfAborted();
  const coarse=matchMedia('(pointer:coarse)').matches;configureTextures(coarse);
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+ const query=new URLSearchParams(location.search),capture=query.has('capture'),cinematic=query.has('cinematic');
  const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance',alpha:false});
  const basePixelRatio=Math.min(devicePixelRatio,coarse?1.3:1.5);
  renderer.setPixelRatio(basePixelRatio);
@@ -28,18 +32,19 @@ export async function createForest(host:HTMLDivElement,onReady:()=>void,signal?:
  const canvas=renderer.domElement;
  canvas.dataset.status='building';host.appendChild(canvas);
  const scene=new THREE.Scene();
- scene.background=new THREE.Color('#9eafa0');
+ scene.background=new THREE.Color(light.fogColor);
  scene.fog=new THREE.FogExp2(light.fogColor,light.fogDensity);
  const camera=new THREE.PerspectiveCamera(58,host.clientWidth/host.clientHeight,.06,FOREST_EXTENT.cameraFar);
  const controls=createControls(camera,canvas,host);clockUniform.value=0;windUniform.value=reduced.matches?0:1;qualityUniform.value=1;
+ if(capture||cinematic){host.parentElement?.classList.add('cinematic','exploring');applyCinematicCamera(camera,0);}
  let disposed=false,lost=false,raf=0,previous=0,elapsed=0,frames=0,frameTime=0,quality=1,lastLOD=0,lastShadow=0;
  let post:ReturnType<typeof createVolumetrics>|undefined;
  let observer:ResizeObserver|undefined;
  let alert:HTMLDivElement|undefined;
  const sun=new THREE.DirectionalLight(light.sunColor,light.sunIntensity);
- sun.position.set(-34,49,-42);sun.target.position.set(0,0,-3);sun.castShadow=true;
+ sun.target.position.set(0,0,-3);sun.position.copy(sun.target.position).add(new THREE.Vector3(...light.sunDirection));sun.castShadow=true;
  sun.shadow.mapSize.set(coarse?2048:4096,coarse?2048:4096);
- Object.assign(sun.shadow.camera,{left:-44,right:44,top:44,bottom:-44,near:1,far:135});
+ Object.assign(sun.shadow.camera,{left:-light.shadowHalfExtent,right:light.shadowHalfExtent,top:light.shadowHalfExtent,bottom:-light.shadowHalfExtent,near:light.shadowNear,far:light.shadowFar});
  sun.shadow.bias=-.00012;sun.shadow.normalBias=.025;sun.shadow.camera.updateProjectionMatrix();
  const contextLost=(e:Event)=>{
   e.preventDefault();lost=true;canvas.dataset.status='context-lost';
@@ -62,6 +67,7 @@ export async function createForest(host:HTMLDivElement,onReady:()=>void,signal?:
   canvas.removeEventListener('webglcontextrestored',contextRestored);
   document.removeEventListener('visibilitychange',resetFrameTiming);
   signal?.removeEventListener('abort',cleanup);
+  if(capture)delete (window as unknown as Record<string,unknown>).__forestCapture;
   const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>(),textures=new Set<THREE.Texture>();
   scene.traverse(object=>{
    if(!(object instanceof THREE.Mesh||object instanceof THREE.Points))return;
@@ -82,6 +88,8 @@ export async function createForest(host:HTMLDivElement,onReady:()=>void,signal?:
   signal?.throwIfAborted();
   createDeadwood(scene,vegetation.bark);
   const details=createForestDetails(scene,vegetation.treePositions,rocks,vegetation.bark,coarse,vegetation.treeSurfaces);
+  const flowers=createWildflowers(scene,vegetation.treePositions,rocks,coarse);
+  const floorDetail=createFloorDetail(scene,vegetation.treePositions,rocks,coarse);
   const particles=addParticles(scene,sun);particles.update(0,camera);
   compactGeometryAttributes(scene);
   post=createVolumetrics(renderer,camera,sun,coarse);
@@ -107,21 +115,51 @@ export async function createForest(host:HTMLDivElement,onReady:()=>void,signal?:
   const shadowCenter=new THREE.Vector3(camera.position.x,0,camera.position.z);
   placeShadowWindow(sun,camera.position);
   renderer.shadowMap.needsUpdate=true;
-  vegetation.update(camera,quality);details.update(camera);
+  const updateDetail=()=>{vegetation.update(camera,quality);details.update(camera);flowers.update(camera);floorDetail.update(camera);};
+  updateDetail();
   // Three 0.180 compileAsync retains material-property polling timers that
   // can outlive disposal or context restoration during startup. Starting
   // compilation synchronously keeps abort and resource teardown atomic.
   post.compile(scene);signal?.throwIfAborted();
   post.render(scene,0);canvas.dataset.status='ready';onReady();
-  canvas.dataset.objects=JSON.stringify({...vegetation.stats,...details.stats});
+  canvas.dataset.objects=JSON.stringify({...vegetation.stats,...details.stats,...flowers.stats,...floorDetail.stats});
+  if(capture){
+   // Capture mode freezes RAF. Every frame uses the real renderer and exact
+   // animation time, independent of the speed of the machine doing capture.
+   let captureShadowTime=-Infinity,capturePreviousTime=-1,captureShot=-1;
+   const captureShadowCenter=new THREE.Vector3(Infinity,0,Infinity);
+   (window as unknown as Record<string,unknown>).__forestCapture={
+    render(time:number,shot?:number){
+     if(!Number.isFinite(time)||time<0||time>FOREST_FILM_DURATION)throw new Error('Capture time must be between 0 and 30 seconds');
+     const view=applyCinematicCamera(camera,time,shot);clockUniform.value=time;qualityUniform.value=1;
+     sky.position.copy(camera.position);particles.update(time,camera);updateDetail();
+     const changedShot=view.index!==captureShot||time<capturePreviousTime;
+     const movedWindow=Math.hypot(camera.position.x-captureShadowCenter.x,camera.position.z-captureShadowCenter.z)>10;
+     if(changedShot||movedWindow){placeShadowWindow(sun,camera.position);captureShadowCenter.copy(camera.position);}
+     // Use the same eight-Hz moving-foliage shadow cadence as exploration.
+     // Re-rendering a 4096px shadow map for every recorded frame added work
+     // absent from the live scene and changed its temporal appearance.
+     renderer.shadowMap.needsUpdate=changedShot||movedWindow||time-captureShadowTime>=(coarse?.24:.125);
+     if(renderer.shadowMap.needsUpdate)captureShadowTime=time;
+     captureShot=view.index;capturePreviousTime=time;
+     renderer.info.reset();post!.render(scene,time);
+     return {...view,triangles:renderer.info.render.triangles,draws:renderer.info.render.calls};
+    },
+    info(){return {duration:FOREST_FILM_DURATION,width:canvas.width,height:canvas.height,objects:JSON.parse(canvas.dataset.objects!)};},
+   };
+   return cleanup;
+  }
+  let cinematicStart:number|undefined;
   function animate(now:number){
    if(disposed)return;raf=requestAnimationFrame(animate);
    const rawDt=previous?(now-previous)/1000:.016;previous=now;
    if(document.hidden||lost){frames=0;frameTime=0;return;}
    const dt=Math.min(rawDt,.055);elapsed+=dt;
    clockUniform.value=elapsed;qualityUniform.value=quality;windUniform.value=reduced.matches?0:1;
-   controls.update(dt,elapsed);sky.position.copy(camera.position);particles.update(reduced.matches?0:elapsed,camera);
-   if(elapsed-lastLOD>.3){vegetation.update(camera,quality);details.update(camera);lastLOD=elapsed;}
+   if(cinematic){cinematicStart??=now;applyCinematicCamera(camera,((now-cinematicStart)/1000)%FOREST_FILM_DURATION);}
+   else controls.update(dt,elapsed);
+   sky.position.copy(camera.position);particles.update(reduced.matches?0:elapsed,camera);
+   if(elapsed-lastLOD>.3){updateDetail();lastLOD=elapsed;}
    if(Math.hypot(camera.position.x-shadowCenter.x,camera.position.z-shadowCenter.z)>10){
     shadowCenter.copy(camera.position);placeShadowWindow(sun,camera.position);renderer.shadowMap.needsUpdate=true;
    }

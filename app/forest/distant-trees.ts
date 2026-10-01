@@ -6,9 +6,11 @@ export type FarTreeCell = {
   meshes: readonly THREE.Mesh[];
 };
 export type FarTreePoolOptions = {
-  poolSize?: 60 | 80;
+  poolSize?: 60 | 80 | 160;
   nearDistance?: number;
   farDistance?: number;
+  /** Fourth geometry tier is reserved for the distant landscape silhouette. */
+  lodLevel?: 2 | 3;
   /** Extra world-unit margin for shader displacement, beyond exact static bounds. */
   boundsPadding?: number;
 };
@@ -42,7 +44,7 @@ export function createFarTreePools(cells: readonly FarTreeCell[], options: FarTr
   const nearDistance = options.nearDistance ?? 108;
   const farDistance = options.farDistance ?? 250;
   const padding = options.boundsPadding ?? 0;
-  if ((poolSize !== 60 && poolSize !== 80) || !Number.isFinite(nearDistance)
+  if ((poolSize !== 60 && poolSize !== 80 && poolSize !== 160) || !Number.isFinite(nearDistance)
     || !Number.isFinite(farDistance) || nearDistance < 0 || farDistance <= nearDistance
     || !Number.isFinite(padding) || padding < 0) throw new Error('Invalid far-tree pool options');
   const group = new THREE.Group();
@@ -66,7 +68,7 @@ export function createFarTreePools(cells: readonly FarTreeCell[], options: FarTr
       seenMeshes.add(source);
       const sourceTransform = source.matrixAutoUpdate ? new THREE.Matrix4().compose(source.position, source.quaternion, source.scale) : source.matrix;
       if (!sourceTransform.equals(identity)) throw new Error('Far-tree source meshes must have identity local transforms');
-      const geometry = source.userData.lods?.[2];
+      const geometry = source.userData.lods?.[options.lodLevel ?? 2];
       if (!(geometry instanceof THREE.BufferGeometry)) throw new Error('A source tree mesh is missing low LOD geometry');
       if (!(source.instanceMatrix.array instanceof Float32Array)) throw new Error('Tree matrices must use Float32 storage');
       if (!Number.isInteger(source.count) || source.count < 0 || source.count > source.instanceMatrix.count) throw new Error('Invalid source instance count');
@@ -134,7 +136,7 @@ export function createFarTreePools(cells: readonly FarTreeCell[], options: FarTr
     mesh.userData.kind = 'tree';
     mesh.userData.dynamicInstances = true;
     mesh.userData.farPool = true;
-    mesh.userData.lodLevel = 2;
+    mesh.userData.lodLevel = options.lodLevel ?? 2;
     mesh.boundingBox = new THREE.Box3();
     mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 0);
     group.add(mesh);
@@ -205,4 +207,64 @@ export function createFarTreePools(cells: readonly FarTreeCell[], options: FarTr
     group.clear();
   }
   return { group, pools, meshes: pools.map(pool => pool.mesh), poolSize, nearDistance, farDistance, update, dispose };
+}
+
+/**
+ * Actual 3D horizon geometry, never a camera-facing card. At 150+ metres most
+ * twig tubes are subpixel: vertex clustering removes their collapsed triangles
+ * while preserving the tree's trunks and branching silhouette. Leaves keep a
+ * stable subset at their exact attachment points with conserved projected area.
+ */
+export function createHorizonGeometry(source:THREE.BufferGeometry,leaves:boolean){
+ const result=new THREE.BufferGeometry();result.name=source.name+'-horizon';
+ const position=source.getAttribute('position');
+ const attributes=Object.entries(source.attributes).filter(([,a])=>a.itemSize<=4);
+ const values=new Map(attributes.map(([name])=>[name,[] as number[]]));
+ const index:number[]=[];
+ // Accessors decode normalized integers and Float16 botanical UV attributes.
+ const componentValue=(a:THREE.BufferAttribute|THREE.InterleavedBufferAttribute,i:number,j:number)=>j===0?a.getX(i):j===1?a.getY(i):j===2?a.getZ(i):a.getW(i);
+ if(leaves){
+  const bases=source.userData.leafBaseIndices as Uint32Array|undefined;
+  if(!bases||!source.index)throw new Error('Horizon leaves require the real low-LOD leaf topology');
+  const retained:number[]=[];
+  for(let leaf=0;leaf<bases.length;leaf++){
+   if(leaf%3!==0)continue;
+   const base=bases[leaf],next=leaf+1<bases.length?bases[leaf+1]:position.count;
+   if(next-base!==4)throw new Error('Horizon leaf geometry expects four-vertex low leaves');
+   const first=values.get('position')!.length/3;retained.push(first);
+   for(let vertex=base;vertex<next;vertex++)for(const [name,a]of attributes){
+    const out=values.get(name)!;
+    for(let component=0;component<a.itemSize;component++){
+     let value=componentValue(a,vertex,component);
+     if(name==='position')value=componentValue(position,base,component)+(value-componentValue(position,base,component))*1.69;
+     out.push(value);
+    }
+   }
+   index.push(first,first+1,first+3,first,first+3,first+2);
+  }
+  result.userData.leafBaseIndices=new Uint32Array(retained);
+ }else{
+  const voxel=.16,lookup=new Map<string,number>(),map=new Uint32Array(position.count),counts:number[]=[];
+  for(let vertex=0;vertex<position.count;vertex++){
+   const key=`${Math.round(position.getX(vertex)/voxel)},${Math.round(position.getY(vertex)/voxel)},${Math.round(position.getZ(vertex)/voxel)}`;
+   let target=lookup.get(key);
+   if(target===undefined){target=counts.length;lookup.set(key,target);counts.push(0);for(const [name,a]of attributes)for(let j=0;j<a.itemSize;j++)values.get(name)!.push(0);}
+   map[vertex]=target;counts[target]++;
+   for(const [name,a]of attributes)for(let j=0;j<a.itemSize;j++)values.get(name)![target*a.itemSize+j]+=componentValue(a,vertex,j);
+  }
+  for(const [name,a]of attributes){const out=values.get(name)!;for(let v=0;v<counts.length;v++)for(let j=0;j<a.itemSize;j++)out[v*a.itemSize+j]/=counts[v];}
+  const sourceIndex=source.getIndex();if(!sourceIndex)throw new Error('Horizon wood requires indexed geometry');
+  const unique=new Set<string>();
+  for(let i=0;i<sourceIndex.count;i+=3){
+   const a=map[sourceIndex.getX(i)],b=map[sourceIndex.getX(i+1)],c=map[sourceIndex.getX(i+2)];
+   if(a===b||a===c||b===c)continue;
+   const key=[a,b,c].sort((x,y)=>x-y).join(',');if(unique.has(key))continue;unique.add(key);index.push(a,b,c);
+  }
+ }
+ for(const [name,a]of attributes)result.setAttribute(name,new THREE.Float32BufferAttribute(values.get(name)!,a.itemSize));
+ result.setIndex(index);result.computeVertexNormals();result.computeBoundingBox();result.computeBoundingSphere();
+ result.boundingSphere!.radius+=leaves?.4:.24;
+ result.userData.horizonSourceTriangles=(source.index?.count??position.count)/3;
+ result.userData.horizonTriangles=index.length/3;
+ return result;
 }

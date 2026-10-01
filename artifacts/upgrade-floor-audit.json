@@ -1,0 +1,163 @@
+{
+  "scope": "Production geometry and placements with deterministic representative trunk/rock fixtures; browser visual review performed by parent.",
+  "geometry": [
+    {
+      "label": "bluebell-high-1",
+      "triangles": 1200,
+      "vertices": 752,
+      "height": 0.5380459126463393
+    },
+    {
+      "label": "bluebell-high-875",
+      "triangles": 1200,
+      "vertices": 752,
+      "height": 0.554252722999081
+    },
+    {
+      "label": "bluebell-low-1",
+      "triangles": 408,
+      "vertices": 284,
+      "height": 0.5380459126463393
+    },
+    {
+      "label": "bluebell-low-875",
+      "triangles": 408,
+      "vertices": 284,
+      "height": 0.554252722999081
+    },
+    {
+      "label": "campion-high-1",
+      "triangles": 939,
+      "vertices": 687,
+      "height": 0.7685853593866341
+    },
+    {
+      "label": "campion-high-875",
+      "triangles": 939,
+      "vertices": 687,
+      "height": 0.7230666624964215
+    },
+    {
+      "label": "campion-low-1",
+      "triangles": 267,
+      "vertices": 273,
+      "height": 0.7685853593866341
+    },
+    {
+      "label": "campion-low-875",
+      "triangles": 267,
+      "vertices": 273,
+      "height": 0.7230666624964215
+    },
+    {
+      "label": "buttercup-high-1",
+      "triangles": 759,
+      "vertices": 567,
+      "height": 0.49594899103976786
+    },
+    {
+      "label": "buttercup-high-875",
+      "triangles": 759,
+      "vertices": 567,
+      "height": 0.46683070372091606
+    },
+    {
+      "label": "buttercup-low-1",
+      "triangles": 267,
+      "vertices": 273,
+      "height": 0.49594899103976786
+    },
+    {
+      "label": "buttercup-low-875",
+      "triangles": 267,
+      "vertices": 273,
+      "height": 0.46683070372091606
+    },
+    {
+      "label": "wood-anemone-high-1",
+      "triangles": 594,
+      "vertices": 442,
+      "height": 0.31306578509975225
+    },
+    {
+      "label": "wood-anemone-high-875",
+      "triangles": 594,
+      "vertices": 442,
+      "height": 0.3285720463609323
+    },
+    {
+      "label": "wood-anemone-low-1",
+      "triangles": 202,
+      "vertices": 208,
+      "height": 0.31306578509975225
+    },
+    {
+      "label": "wood-anemone-low-875",
+      "triangles": 202,
+      "vertices": 208,
+      "height": 0.3285720463609323
+    },
+    {
+      "label": "sorrel",
+      "triangles": 184,
+      "vertices": 180,
+      "height": 0.1180673135095276
+    },
+    {
+      "label": "moss-star",
+      "triangles": 528,
+      "vertices": 528,
+      "height": 0.050422603730112314
+    },
+    {
+      "label": "curled-litter",
+      "triangles": 120,
+      "vertices": 96,
+      "height": 0.027208424173295498
+    },
+    {
+      "label": "seedheads",
+      "triangles": 690,
+      "vertices": 633,
+      "height": 0.591504493226239
+    },
+    {
+      "label": "pebbles",
+      "triangles": 80,
+      "vertices": 42,
+      "height": 0.03599641751497984
+    }
+  ],
+  "scenes": {
+    "desktop": {
+      "wildflowers": 9437,
+      "flowerDrifts": 172,
+      "flowerFamilies": 4,
+      "sorrelPatches": 7629,
+      "mossRosettes": 3839,
+      "curledLeafPiles": 4505,
+      "seedheadClumps": 854,
+      "smallPebbles": 1899,
+      "instances": 28163,
+      "batches": 870,
+      "maxGroundError": 0.0000016256697069547132,
+      "sampledMaxTriangles": 2273554,
+      "sampledMaxDraws": 70
+    },
+    "touch": {
+      "wildflowers": 5064,
+      "flowerDrifts": 172,
+      "flowerFamilies": 4,
+      "sorrelPatches": 4241,
+      "mossRosettes": 2039,
+      "curledLeafPiles": 2508,
+      "seedheadClumps": 466,
+      "smallPebbles": 1072,
+      "instances": 15390,
+      "batches": 873,
+      "maxGroundError": 0.000001779012287046744,
+      "sampledMaxTriangles": 843602,
+      "sampledMaxDraws": 48
+    }
+  }
+}

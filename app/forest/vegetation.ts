@@ -9,7 +9,7 @@ import {createCompactGrass} from './compact-grass';
 import type {TreeSurface} from './trunk-life';
 import {packGeometries} from './geometry-memory';
 import {FOREST_EXTENT} from './config';
-import {createFarTreePools} from './distant-trees';
+import {createFarTreePools,createHorizonGeometry} from './distant-trees';
 type Cell = {center:THREE.Vector3,meshes:THREE.Mesh[],kind:string,base:number[],individual?:{matrices:Float32Array,colors:Float32Array,count:number}};
 export async function createVegetation(scene:THREE.Scene,coarse:boolean,signal?:AbortSignal){
  const cells:Cell[]=[],r=rng(716126),o=new THREE.Object3D();
@@ -30,6 +30,8 @@ export async function createVegetation(scene:THREE.Scene,coarse:boolean,signal?:
   sphere.radius+=part==='leaves'?.34:.22;
   for(const geometry of shapes)geometry.boundingSphere=sphere.clone();
  }
+ const horizons=variants.map(variant=>({wood:createHorizonGeometry(variant.low.wood,false),leaves:createHorizonGeometry(variant.low.leaves,true)}));
+ for(const horizon of horizons)packGeometries([horizon.wood,horizon.leaves]);
  const groundVertices=variants.map(variant=>{
   const p=variant.wood.attributes.position,points:THREE.Vector3[]=[];
   for(let i=0;i<p.count;i++)if(Math.abs(p.getY(i))<1e-7)points.push(new THREE.Vector3(p.getX(i),0,p.getZ(i)));
@@ -55,10 +57,24 @@ export async function createVegetation(scene:THREE.Scene,coarse:boolean,signal?:
  // The extra woodland is only visible through the distant atmospheric veil.
  const outer=rng(170491);
  for(let i=0;i<4500;i++){
-  const x=(outer()-.5)*FOREST_EXTENT.vegetation*2,z=(outer()-.5)*FOREST_EXTENT.vegetation*2;
+  const x=(outer()-.5)*680,z=(outer()-.5)*680;
   if(Math.abs(x)<220&&Math.abs(z)<220)continue;
   if(positions.some(p=>(p.x-x)**2+(p.z-z)**2<5.5**2))continue;
   positions.push({x,z,s:.67+outer()*.54,v:Math.floor(outer()*8),rot:outer()*6.28});
+ }
+ // A separate random stream adds only the far landscape. Existing trees,
+ // undergrowth draws, trunk life and hero compositions stay deterministic.
+ const landscape=rng(710283),landscapeGrid=new Map<string,typeof positions>();
+ const landscapeKey=(x:number,z:number)=>`${Math.floor(x/6)},${Math.floor(z/6)}`;
+ for(const p of positions){const key=landscapeKey(p.x,p.z);if(!landscapeGrid.has(key))landscapeGrid.set(key,[]);landscapeGrid.get(key)!.push(p);}
+ for(let i=0;i<7800;i++){
+  const x=(landscape()-.5)*FOREST_EXTENT.vegetation*2,z=(landscape()-.5)*FOREST_EXTENT.vegetation*2;
+  if(Math.abs(x)<340&&Math.abs(z)<340)continue;
+  const gx=Math.floor(x/6),gz=Math.floor(z/6);let crowded=false;
+  for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++)for(const p of landscapeGrid.get(`${gx+dx},${gz+dz}`)||[])if((p.x-x)**2+(p.z-z)**2<6.2**2)crowded=true;
+  if(crowded)continue;
+  const p={x,z,s:.68+landscape()*.64,v:Math.floor(landscape()*8),rot:landscape()*6.28};positions.push(p);
+  const key=landscapeKey(x,z);if(!landscapeGrid.has(key))landscapeGrid.set(key,[]);landscapeGrid.get(key)!.push(p);
  }
  const treeCells=Math.ceil(FOREST_EXTENT.vegetation/20);
  for(let cz=-treeCells;cz<treeCells;cz++)for(let cx=-treeCells;cx<treeCells;cx++){
@@ -78,11 +94,13 @@ export async function createVegetation(scene:THREE.Scene,coarse:boolean,signal?:
     }
     o.position.y-=p.sink;o.updateMatrix();
     if(geo===variants[v].wood){const rows=geo.userData.trunkSurfaceRows as number[][],vertices=geo.attributes.position;let radius=0;for(const index of rows[0])radius=Math.max(radius,Math.hypot(vertices.getX(index)*o.scale.x,vertices.getZ(index)*o.scale.z));p.radius=radius+.045;}
-    mesh.setMatrixAt(i,o.matrix);if(geo===variants[v].wood&&Math.hypot(p.x,p.z)<120)treeSurfaces.push({geometry:geo,matrix:o.matrix.clone(),center:new THREE.Vector3(p.x,0,p.z),seed:Math.floor((p.x+220)*7919+(p.z+220)*104729)});});mesh.userData.kind='tree';mesh.customDepthMaterial=geo===variants[v].leaves?leafDepth:woodDepth;mesh.userData.lods=geo===variants[v].wood?[geo,variants[v].medium.wood,variants[v].low.wood]:[geo,variants[v].medium.leaves,variants[v].low.leaves];mesh.castShadow=mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);meshes.push(mesh);}
+    mesh.setMatrixAt(i,o.matrix);if(geo===variants[v].wood&&Math.hypot(p.x,p.z)<120)treeSurfaces.push({geometry:geo,matrix:o.matrix.clone(),center:new THREE.Vector3(p.x,0,p.z),seed:Math.floor((p.x+220)*7919+(p.z+220)*104729)});});mesh.userData.kind='tree';mesh.customDepthMaterial=geo===variants[v].leaves?leafDepth:woodDepth;mesh.userData.lods=geo===variants[v].wood?[geo,variants[v].medium.wood,variants[v].low.wood,horizons[v].wood]:[geo,variants[v].medium.leaves,variants[v].low.leaves,horizons[v].leaves];mesh.castShadow=mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);meshes.push(mesh);}
   }
   if(meshes.length)cells.push({center:new THREE.Vector3(cx*20+10,0,cz*20+10),meshes,kind:'tree',base:meshes.map(m=>m.count)});
  }
- const distantTrees=createFarTreePools(cells.filter(c=>c.kind==='tree'),{poolSize:80,boundsPadding:.6});scene.add(distantTrees.group);
+ const treeCellSources=cells.filter(c=>c.kind==='tree');
+ const distantTrees=createFarTreePools(treeCellSources,{poolSize:80,farDistance:FOREST_EXTENT.horizonLOD,boundsPadding:.6});scene.add(distantTrees.group);
+ const horizonTrees=createFarTreePools(treeCellSources,{poolSize:160,nearDistance:FOREST_EXTENT.horizonLOD,farDistance:FOREST_EXTENT.treeFar,lodLevel:3,boundsPadding:.75});scene.add(horizonTrees.group);
  const grassMat=windMaterial('grass',{},true),fernMat=windMaterial('fern'),shrubMat=windMaterial('shrub'),herbMat=windMaterial('grass');
  const cellKey=(x:number,z:number)=>((x+1024)<<12)|(z+1024);
  const trunkGrid=new Map<number,typeof positions>();
@@ -204,7 +222,7 @@ export async function createVegetation(scene:THREE.Scene,coarse:boolean,signal?:
  function grassDensity(d:number){return d<22?1:d<36?THREE.MathUtils.lerp(1,.55,(d-22)/14):d<51?THREE.MathUtils.lerp(.55,.22,(d-36)/15):d<70?THREE.MathUtils.lerp(.22,.10,(d-51)/19):THREE.MathUtils.lerp(.10,0,THREE.MathUtils.clamp((d-70)/18,0,1));}
  function update(camera:THREE.Camera,quality:number){
   const pos=camera.position;
-  for(const c of cells){const d=Math.hypot(pos.x-c.center.x,pos.z-c.center.z);const max=c.kind==='tree'?250:c.kind==='grass'?88:c.kind==='fern'?67:c.kind==='shrub'?98:48;
+  for(const c of cells){const d=Math.hypot(pos.x-c.center.x,pos.z-c.center.z);const max=c.kind==='tree'?FOREST_EXTENT.treeFar:c.kind==='grass'?88:c.kind==='fern'?67:c.kind==='shrub'?98:48;
    if(c.individual){
     const source=c.individual,counts=c.meshes.map(()=>0);
     for(const m of c.meshes){m.visible=d<max+14;m.castShadow=c.kind==='fern'?d<27:d<48;}
@@ -234,7 +252,7 @@ export async function createVegetation(scene:THREE.Scene,coarse:boolean,signal?:
     }
    }
   }
-  distantTrees.update(camera);
+  distantTrees.update(camera);horizonTrees.update(camera);
  }
- return {update,stats,bark,treePositions:positions,treeSurfaces,distantTrees};
+ return {update,stats,bark,treePositions:positions,treeSurfaces,distantTrees,horizonTrees};
 }

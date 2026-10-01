@@ -15,8 +15,8 @@ uniform float time;uniform float strength;
 float hash(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float noise3(vec3 x){vec3 p=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(mix(mix(hash(p),hash(p+vec3(1,0,0)),f.x),mix(hash(p+vec3(0,1,0)),hash(p+vec3(1,1,0)),f.x),f.y),mix(mix(hash(p+vec3(0,0,1)),hash(p+vec3(1,0,1)),f.x),mix(hash(p+vec3(0,1,1)),hash(p+vec3(1,1,1)),f.x),f.y),f.z);}
 float visibility(vec3 p){vec4 sp=sunMatrix*vec4(p,1.);vec3 uv=sp.xyz/sp.w;if(any(lessThan(uv,vec3(0.)))||any(greaterThan(uv,vec3(1.))))return .35;float d=unpackRGBAToDepth(texture2D(tShadow,uv.xy));return smoothstep(uv.z-.0008,uv.z-.0003,d);}
-void main(){float depth=texture2D(tDepth,vUv).r;vec4 view=invProjection*vec4(vUv*2.-1.,depth*2.-1.,1.);view/=view.w;vec3 world=(cameraWorld*view).xyz;vec3 ray=world-eye;float distance=min(length(ray),105.);ray=normalize(ray);float stepLength=distance/40.;float jitter=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);float trans=1.;vec3 scatter=vec3(0.);float forward=pow(max(dot(ray,sunDirection),0.),5.);float phase=.45+forward*1.55;
-for(int i=0;i<40;i++){vec3 p=eye+ray*(float(i)+jitter)*stepLength;float n=noise3(p*.065+vec3(time*.004,0.,0.));float heightDensity=exp(-max(p.y-1.,0.)*.062);float density=(.0036+n*.009)*heightDensity*strength;float light=visibility(p);float absorption=exp(-density*stepLength);vec3 lightColor=mix(vec3(.12,.18,.17),vec3(.90,.76,.43)*phase,light);scatter+=trans*(1.-absorption)*lightColor;trans*=absorption;}
+void main(){float depth=texture2D(tDepth,vUv).r;vec4 view=invProjection*vec4(vUv*2.-1.,depth*2.-1.,1.);view/=view.w;vec3 world=(cameraWorld*view).xyz;vec3 ray=world-eye;float distance=min(length(ray),${light.volumeDistance}.);ray=normalize(ray);float stepLength=distance/40.;float jitter=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);float trans=1.;vec3 scatter=vec3(0.);float forward=pow(max(dot(ray,sunDirection),0.),5.);float phase=.48+forward*1.75;
+for(int i=0;i<40;i++){vec3 p=eye+ray*(float(i)+jitter)*stepLength;float n=noise3(p*.065+vec3(time*.004,0.,0.));float heightDensity=exp(-max(p.y-1.,0.)*.062);float density=(.002+n*.006)*heightDensity*strength;float light=visibility(p);float absorption=exp(-density*stepLength);vec3 lightColor=mix(vec3(.13,.21,.23),vec3(.94,.82,.56)*phase,light);scatter+=trans*(1.-absorption)*lightColor;trans*=absorption;}
 gl_FragColor=vec4(scatter,trans);}
 `;
 // Small-scale screen-space occlusion supplies the contact shading that a
@@ -57,8 +57,8 @@ vec4 p=invProjection*vec4(vUv*2.-1.,texture2D(tDepth,vUv).r*2.-1.,1.);float dept
 // Distant extinction joins geometry to the same directional sky radiance.
 // The veil begins beyond the detailed grove and reaches opacity before clipping.
 vec3 ray=(cameraWorld*vec4(p.xyz/p.w,0.)).xyz;
-vec3 horizon=forestSky(ray,vec3(${new THREE.Color('#759ca7').toArray().join(',')}),vec3(${new THREE.Color('#c4ccad').toArray().join(',')}),normalize(vec3(-34.,49.,-39.)));
-c=mix(c,horizon,smoothstep(120.,240.,length(ray)));
+vec3 horizon=forestSky(ray,vec3(${new THREE.Color(light.skyTop).toArray().join(',')}),vec3(${new THREE.Color(light.skyBottom).toArray().join(',')}),normalize(vec3(${light.sunDirection.map(n=>n.toFixed(1)).join(',')})));
+c=mix(c,horizon,smoothstep(${light.hazeStart}.,${light.hazeEnd}.,length(ray)));
 // Bilateral volume upsampling keeps mist from spilling across nearby leaves.
 vec2 grid=vUv/volumeTexel-.5,base=(floor(grid)+.5)*volumeTexel,part=fract(grid);
 vec4 v=vec4(0.);float volumeWeight=0.;
@@ -76,7 +76,13 @@ float weight=exp(-abs((sampleAo.y+sampleAo.z/255.)*${FOREST_EXTENT.cameraFar}.-d
 ao+=sampleAo.x*weight;total+=weight;
 }
 ao=total>.00001?ao/total:1.;
-c=c*mix(.30,1.,ao)*v.a+v.rgb;float vignette=1.-.15*pow(length((vUv-.5)*vec2(1.05,.85)),1.8);gl_FragColor=vec4(c*vignette,1.);
+c=c*mix(.44,1.,ao)*v.a+v.rgb;
+// A restrained pre-tonemap grade keeps the forest green, while separating
+// cool shaded foliage from the warm direct-light highlights.
+float luminance=dot(c,vec3(.2126,.7152,.0722));
+c=mix(vec3(luminance),c,${light.saturation});
+c*=mix(vec3(.94,.995,1.025),vec3(1.018,1.,.97),smoothstep(.10,.85,luminance));
+float vignette=1.-.10*pow(length((vUv-.5)*vec2(1.05,.85)),1.8);gl_FragColor=vec4(max(c,vec3(0.))*vignette,1.);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
 }`;
@@ -85,7 +91,7 @@ export function createVolumetrics(renderer:THREE.WebGLRenderer,camera:THREE.Pers
  const sceneTarget=new THREE.WebGLRenderTarget(1,1,{type:targetType,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:true});sceneTarget.samples=Math.min(renderer.capabilities.maxSamples,coarse?2:4);sceneTarget.depthTexture=new THREE.DepthTexture(1,1,THREE.UnsignedIntType);
  const volumeTarget=new THREE.WebGLRenderTarget(1,1,{type:targetType,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:false});
  const occlusionTarget=new THREE.WebGLRenderTarget(1,1,{type:THREE.UnsignedByteType,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter,depthBuffer:false});
- const uniforms={tDepth:{value:sceneTarget.depthTexture},tShadow:{value:null as THREE.Texture|null},invProjection:{value:camera.projectionMatrixInverse},cameraWorld:{value:camera.matrixWorld},sunMatrix:{value:sun.shadow.matrix},eye:{value:camera.position},sunDirection:{value:new THREE.Vector3(-34,49,-39).normalize()},resolution:{value:new THREE.Vector2()},time:{value:0},strength:{value:light.volumeStrength}};
+ const uniforms={tDepth:{value:sceneTarget.depthTexture},tShadow:{value:null as THREE.Texture|null},invProjection:{value:camera.projectionMatrixInverse},cameraWorld:{value:camera.matrixWorld},sunMatrix:{value:sun.shadow.matrix},eye:{value:camera.position},sunDirection:{value:new THREE.Vector3(...light.sunDirection).normalize()},resolution:{value:new THREE.Vector2()},time:{value:0},strength:{value:light.volumeStrength}};
  const volumeMaterial=new THREE.ShaderMaterial({uniforms,vertexShader,fragmentShader:volumeFragment,depthTest:false,depthWrite:false});const volumeQuad=new FullScreenQuad(volumeMaterial);
  const occlusionMaterial=new THREE.ShaderMaterial({uniforms:{tDepth:{value:sceneTarget.depthTexture},invProjection:{value:camera.projectionMatrixInverse},projection:{value:camera.projectionMatrix},resolution:{value:new THREE.Vector2()},radius:{value:.85}},vertexShader,fragmentShader:occlusionFragment,depthTest:false,depthWrite:false});const occlusionQuad=new FullScreenQuad(occlusionMaterial);
  const compositeMaterial=new THREE.ShaderMaterial({uniforms:{tScene:{value:sceneTarget.texture},tVolume:{value:volumeTarget.texture},tOcclusion:{value:occlusionTarget.texture},tDepth:{value:sceneTarget.depthTexture},invProjection:{value:camera.projectionMatrixInverse},cameraWorld:{value:camera.matrixWorld},texel:{value:new THREE.Vector2()},volumeTexel:{value:new THREE.Vector2()}},vertexShader,fragmentShader:compositeFragment,depthTest:false,depthWrite:false});const compositeQuad=new FullScreenQuad(compositeMaterial);

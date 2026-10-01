@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import {rng} from './math';
-import {FOREST_LIGHTING as lighting} from './config';
+import {FOREST_LIGHTING as lighting,FOREST_EXTENT} from './config';
 export const skyRadianceGLSL=`vec3 forestSky(vec3 direction,vec3 top,vec3 bottom,vec3 sun){vec3 d=normalize(direction);float h=pow(max(0.,d.y),.6);vec3 c=mix(bottom,top,h);float glow=pow(max(0.,dot(d,sun)),20.);c+=vec3(.65,.50,.25)*glow*.7;c+=vec3(2.,1.8,1.3)*smoothstep(.9994,.9998,dot(d,sun));return c;}`;
 export function addSky(scene:THREE.Scene) {
- const sky=new THREE.Mesh(new THREE.SphereGeometry(240,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{top:{value:new THREE.Color('#759ca7')},bottom:{value:new THREE.Color('#c4ccad')},sun:{value:new THREE.Vector3(...lighting.sunDirection).normalize()}},vertexShader:`varying vec3 vDir; void main(){vDir=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform vec3 top;uniform vec3 bottom;uniform vec3 sun;varying vec3 vDir;${skyRadianceGLSL} void main(){gl_FragColor=vec4(forestSky(vDir,top,bottom,sun),1.);#include <tonemapping_fragment>\n#include <colorspace_fragment>}`.replace(';#include',';\n#include')}));sky.renderOrder=-1;sky.frustumCulled=false;scene.add(sky);return sky;
+ const sky=new THREE.Mesh(new THREE.SphereGeometry(FOREST_EXTENT.cameraFar*.98,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{top:{value:new THREE.Color(lighting.skyTop)},bottom:{value:new THREE.Color(lighting.skyBottom)},sun:{value:new THREE.Vector3(...lighting.sunDirection).normalize()}},vertexShader:`varying vec3 vDir; void main(){vDir=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform vec3 top;uniform vec3 bottom;uniform vec3 sun;varying vec3 vDir;${skyRadianceGLSL} void main(){gl_FragColor=vec4(forestSky(vDir,top,bottom,sun),1.);#include <tonemapping_fragment>\n#include <colorspace_fragment>}`.replace(';#include',';\n#include')}));sky.renderOrder=-1;sky.frustumCulled=false;scene.add(sky);return sky;
 }
 export function addParticles(scene:THREE.Scene,sun:THREE.DirectionalLight){
  const n=600,r=rng(218),positions=new Float32Array(n*3),seeds=new Float32Array(n);
