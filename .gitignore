@@ -103,3 +103,10 @@ artifacts/upgrade-bark/*.bin
 artifacts/upgrade-bark/*.mjs
 artifacts/upgrade-bark/*.vert
 artifacts/upgrade-bark/*.frag
+
+# Laptop capture batches and movies: preserve separately, never commit raw frames.
+artifacts/laptop-*/
+artifacts/browser-capture/
+artifacts/**/*.mp4
+artifacts/**/frame-*.png
+artifacts/**/timings-*.jsonl

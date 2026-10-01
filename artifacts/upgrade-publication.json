@@ -1,0 +1,12 @@
+{
+  "site_version": 3,
+  "status": "succeeded",
+  "url": "https://verdant-forest.lexn8.chatgpt.site",
+  "source_commit": "486260a6f94c3fa175620005d2f9e29820e439ba",
+  "source_tree": "a367a10e921d0cdb488f0911c05e804d55e55d5e",
+  "github_commit": "2d7ddf6d379ff582ea3b6d10f86e60ef0991764e",
+  "github_tree": "a367a10e921d0cdb488f0911c05e804d55e55d5e",
+  "audience": "public",
+  "published_page_check": "Application loaded expected assets/engine-CCn-lz9D.js; supplied cloud browser has GL_RENDERER=Disabled and displays designed unsupported-WebGL message. Actual 3D visual and video verification uses local Chromium WebGL2/SwiftShader.",
+  "updated_at": "2026-10-01T00:38:36.407262+00:00"
+}

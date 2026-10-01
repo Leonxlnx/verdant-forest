@@ -1,0 +1,52 @@
+{
+  "status": "stopped-by-user",
+  "reason": "User requested stopping the cloud render, pushing all source/context to GitHub main, and handing full recording to a laptop GPU agent.",
+  "sourceHash": "090013292d8f5d247f522f42402662883680e442a6e35fcc311c10d6809d8a80",
+  "publishedSceneSourceCommit": "486260a6f94c3fa175620005d2f9e29820e439ba",
+  "method": "Actual production WebGL browser canvas captured at n/24 seconds. No frame interpolation.",
+  "cloudRenderer": "Chromium 153 / ANGLE SwiftShader / WebGL2",
+  "partialCapture": {
+    "savedFrames": 431,
+    "firstFrame": 0,
+    "lastFrame": 430,
+    "targetFrames": 720,
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "coveredSeconds": 17.958333333333332,
+    "allSavedPngHashesMatchLedger": true,
+    "consoleErrors": [],
+    "inGit": false
+  },
+  "finalMovie": {
+    "status": "not-complete",
+    "delivered": false
+  },
+  "previousPreview": {
+    "seconds": 8,
+    "frames": 192,
+    "fps": 24,
+    "resolution": [
+      1280,
+      720
+    ],
+    "deliveredEarlier": true
+  },
+  "nextCapture": {
+    "location": "user laptop hardware GPU",
+    "startNewSequence": true,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "frames": 720,
+    "durationSeconds": 30,
+    "1080pPreviouslyValidated": false,
+    "requireHardwareProbe": true,
+    "requireSmokeFrames": true,
+    "handoff": "GPU_CAPTURE_HANDOFF.md"
+  },
+  "resumeSeamEvidence": [
+    "artifacts/capture-resume-seam.jpg",
+    "artifacts/capture-resume-seam.json"
+  ]
+}

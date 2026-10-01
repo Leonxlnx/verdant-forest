@@ -7,7 +7,9 @@
   EVIDENCE: artifacts/upgrade-lighting-audit.json, upgrade-lighting-review.md; actual Chromium t0,8,11,20,25,28 review; final camera range460m and 7155trees.
 - [x] U4: Current source builds and WebGL shader compilation passes; runtime inspected to available capability.
   EVIDENCE: final TypeScript check and npm run build exit0 (artifacts/upgrade-build.log); 43/43 WebGL ES shader programs compile/link; local Chromium WebGL2 runs real production engine with no console errors.
-- [ ] U5: Exact source preserved and published to existing public Site; deployment terminal success verified.
-  EVIDENCE: pending
+- [x] U5: Exact source preserved and published to existing public Site; deployment terminal success verified.
+  EVIDENCE: artifacts/upgrade-publication.json records successful public version 3 publication of source commit 486260a6f94c3fa175620005d2f9e29820e439ba and matching Sites/GitHub source tree a367a10e921d0cdb488f0911c05e804d55e55d5e. The live page loaded the expected engine asset; actual WebGL visual proof uses local Chromium because the supplied cloud browser disables WebGL.
 - [ ] U6: Smooth 30-second video from actual browser scene delivered and verified, with capture limits disclosed accurately.
-  EVIDENCE: pending
+  EVIDENCE: deferred by explicit user scope change. The user requested stopping the slow cloud software capture, preserving source/context/scripts on GitHub main, and continuing the full film on a laptop GPU. GPU_CAPTURE_HANDOFF.md records continuation and final verification. The earlier eight-second preview and partial native frames do not satisfy this gate. No completed 30-second recording is claimed.
+- [ ] U7: Revised user scope fulfilled: complete application, meaningful context and capture scripts preserved on GitHub main, with an actionable hardware-GPU laptop handoff.
+  EVIDENCE: pending final commit and exact-tree GitHub main readback. README.md, SESSION_CONTEXT.md and GPU_CAPTURE_HANDOFF.md define the continuation. The final synchronization must preserve every committed file path, mode and blob hash; keep its readback receipt outside the public commit.

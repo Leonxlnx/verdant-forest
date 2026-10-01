@@ -1,11 +1,18 @@
+/** Portable local capture launcher: Node + Vite, no Bash/cloud wrapper required. */
 import {spawn} from 'node:child_process';
-const server=spawn('bash',['scripts/sites-env.sh','--','node','node_modules/vite/bin/vite.js','--config','scripts/capture-vite.config.mjs'],{stdio:'inherit'});
+import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+process.chdir(root);
+const args=process.argv.slice(2);
+let server,task;
 try{
- for(let i=0;i<120;i++){
-  try{const r=await fetch('http://127.0.0.1:5173/');if(r.ok)break;}catch{}
-  await new Promise(r=>setTimeout(r,1000));
-  if(i===119)throw new Error('Local preview not ready after 120 seconds');
+ if(!args.includes('--help')&&!args.includes('--source-only')){
+  const {createServer}=await import('vite');
+  server=await createServer({configFile:path.join(root,'scripts/capture-vite.config.mjs')});
+  await server.listen();
  }
- const task=spawn(process.execPath,['scripts/capture-browser.mjs',...process.argv.slice(2)],{stdio:'inherit'});
- const code=await new Promise(r=>task.once('exit',r));process.exitCode=code;
-}finally{server.kill('SIGTERM');}
+ task=spawn(process.execPath,['scripts/capture-browser.mjs',...args],{cwd:root,stdio:'inherit'});
+ for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>task.kill(signal));
+ process.exitCode=await new Promise((resolve,reject)=>{task.once('error',reject);task.once('exit',(code,signal)=>resolve(code??(signal?130:1)));});
+}finally{await server?.close();}

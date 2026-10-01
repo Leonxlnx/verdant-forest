@@ -1,0 +1,19 @@
+{
+  "purpose": "Portable launcher and hardware-required preflight, without loading the forest",
+  "exitCode": 1,
+  "expectedResult": "software renderer rejected before production scene load",
+  "browserVersion": "153.0.8010.0",
+  "graphics": {
+    "vendor": "Google Inc. (Google)",
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "unmasked": true,
+    "webglVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "software": true,
+    "hardwareVerified": false
+  },
+  "capturedFrames": 0,
+  "sourceHash": "090013292d8f5d247f522f42402662883680e442a6e35fcc311c10d6809d8a80",
+  "status": "passed",
+  "nodeSyntaxAndHelp": "passed",
+  "pythonVerifierCompilation": "passed"
+}
